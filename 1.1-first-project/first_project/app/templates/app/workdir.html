@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Working Directory</title>
+</head>
+<body>
+    <h3>Рабочая директория: </h3>
+    <a>{{workdir}}</a>
+    <h3>Содержимое рабочей директории: </h3>
+    {% for entity in dirs %}
+        <a>{{ entity }}</a>
+        <br>
+    {% endfor %}
+</body>
+</html>
