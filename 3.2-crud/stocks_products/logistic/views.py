@@ -8,7 +8,6 @@ from logistic.serializers import ProductSerializer, StockSerializer
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    # при необходимости добавьте параметры фильтрации
 
     def create(self, request):
         Product.objects.create(title=request.data['title'], description=request.data['description'])
@@ -61,3 +60,24 @@ class StockViewSet(ModelViewSet):
     queryset = Stock.objects.all()
     serializer_class = StockSerializer
     # при необходимости добавьте параметры фильтрации
+
+    def list(self, request):
+        arg = request.GET.get('products')
+        found_stocks = []
+        queryset = self.get_queryset()
+
+        if not arg:
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+
+        for stock in queryset:
+            products = stock.products.all()
+            for position in products:
+                if int(arg) == position.id:
+                    found_stocks.append(stock)
+
+        if len(found_stocks) == 0:
+            return Response({'detail': f'There is no such stocks.'})
+
+        serializer = self.get_serializer(found_stocks, many=True)
+        return Response(serializer.data)
