@@ -9,7 +9,8 @@ class AdvertisementFilter(filters.FilterSet):
     # TODO: задайте требуемые фильтры
     created_at = DateFromToRangeFilter()
     updated_at = DateFromToRangeFilter()
+    # creator =
 
     class Meta:
         model = Advertisement
-        fields = ['created_at', 'updated_at']
+        fields = ['created_at', 'updated_at', 'creator']

@@ -16,7 +16,10 @@ class AdvertisementViewSet(ModelViewSet):
     queryset = Advertisement.objects.all()
     serializer_class = AdvertisementSerializer
     permission_classes = [IsOwnerOrReadOnly]
-    # filter_backends = [AdvertisementFilter]
+    filterset_class = AdvertisementFilter
+
+    # А зачем вообще переопределять для методов? Через класс-наследник BasePermission вроде как хорошо
+    # валидируются как изменение, так и удаление объявления
 
     # def get_permissions(self):
     #     """Получение прав для действий."""
