@@ -1,5 +1,7 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework import filters
 
 from logistic.models import Product, Stock
 from logistic.serializers import ProductSerializer, StockSerializer
@@ -8,76 +10,14 @@ from logistic.serializers import ProductSerializer, StockSerializer
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-
-    def create(self, request):
-        Product.objects.create(title=request.data['title'], description=request.data['description'])
-
-        return Response({'detail': 'Product is added.'})
-
-    def list(self, request):
-        arg = request.GET.get('search')
-        found_products = []
-        queryset = self.get_queryset()
-
-        if not arg:
-            serializer = self.get_serializer(queryset, many=True)
-            return Response(serializer.data)
-
-        for product in queryset:
-            if arg.casefold() in product.title.casefold() or arg.casefold() in product.description.casefold():
-                found_products.append(product)
-
-        if len(found_products) == 0:
-            return Response({'detail': f'There is no such products.'})
-
-        serializer = self.get_serializer(found_products, many=True)
-        return Response(serializer.data)
-
-    def partial_update(self, request, pk=None):
-        if not pk:
-            return Response({'detail': f'Request error.'})
-
-        product = Product.objects.filter(id=pk)
-        if len(product) == 0:
-            return Response({'detail': f'There is no product №{pk}.'})
-
-        product.update(description=request.data['description'])
-        return Response({'detail': f'Product №{pk} is updated.'})
-
-    def destroy(self, request, pk=None):
-        if not pk:
-            return Response({'detail': f'Request error.'})
-
-        product = Product.objects.filter(id=pk)
-        if len(product) == 0:
-            return Response({'detail': f'There is no product №{pk}.'})
-
-        product.delete()
-        return Response({'detail': f'Product №{pk} is deleted.'})
+    filter_backends = [filters.SearchFilter, ]
+    search_fields = ['title', 'description']
 
 
 class StockViewSet(ModelViewSet):
     queryset = Stock.objects.all()
     serializer_class = StockSerializer
-    # при необходимости добавьте параметры фильтрации
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
+    search_fields = ['products__title', 'products__description']
+    filterset_fields = ['products']
 
-    def list(self, request):
-        arg = request.GET.get('products')
-        found_stocks = []
-        queryset = self.get_queryset()
-
-        if not arg:
-            serializer = self.get_serializer(queryset, many=True)
-            return Response(serializer.data)
-
-        for stock in queryset:
-            products = stock.products.all()
-            for position in products:
-                if int(arg) == position.id:
-                    found_stocks.append(stock)
-
-        if len(found_stocks) == 0:
-            return Response({'detail': f'There is no such stocks.'})
-
-        serializer = self.get_serializer(found_stocks, many=True)
-        return Response(serializer.data)
