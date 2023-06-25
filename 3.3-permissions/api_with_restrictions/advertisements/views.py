@@ -1,5 +1,6 @@
 # from rest_framework import filters
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 from rest_framework.viewsets import ModelViewSet
 
 from advertisements.filters import AdvertisementFilter
@@ -15,6 +16,7 @@ class AdvertisementViewSet(ModelViewSet):
     serializer_class = AdvertisementSerializer
     permission_classes = [IsOwnerOrReadOnly]
     filterset_class = AdvertisementFilter
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     # А зачем вообще переопределять для методов? Через класс IsOwnerOrReadOnly, который наследник
     # BasePermission вроде как хорошо валидируются как изменение, так и удаление объявления
