@@ -42,12 +42,16 @@ class AdvertisementSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """Метод для валидации. Вызывается при создании и обновлении."""
         user = self.context["request"].user
-        if not user.id:
-            raise ValidationError(['You can create advertisement only after authorization'])
+        # if not user.id:
+        #     raise ValidationError(['You can create advertisement only after authorization'])
+
+        # Если создаём - изначально в data нет поля status
+        if 'status' not in data:
+            data['status'] = 'OPEN'
 
         max_opened_count = 10
-        opened_count = len(Advertisement.objects.filter(creator=user, status='OPEN'))
-        if opened_count > max_opened_count:
+        opened_count = Advertisement.objects.filter(creator=user, status='OPEN').count()
+        if opened_count > max_opened_count and data['status'] != 'CLOSED':
             raise ValidationError(['Too many opened advertisements for one user'])
 
         return data
